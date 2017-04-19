@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.31.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.31.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiamNtczIwMTYiLCJhIjoiY2lzamg4d2lwMDJpcDJ1bnczZXl0djF0OSJ9.Rkf4EpGvTrLG2EpaigeQJA';
+var map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/outdoors-v9",
+	// Centrado
+    center: [-79.888944,-2.265027],
+    zoom: 15
+});
+
+map.on("load", function() {
+    map.addSource("route", {
+        "type": "geojson",
+        "data": {
+            "type": "FeatureCollection",
+            "features": [{
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+			// Linea de Recorrido
+            "type": "LineString",
+                    "coordinates": [
+                        // Inicio Coordenadas			
+                           [-79.888944, -2.265027],
+                           [-79.888864, -2.264881],	
+	                       [-79.888944, -2.265027 ],
+                           [ -79.888864, -2.264881],
+                           [ -79.888864,-2.264881],
+                           [ -79.888776,-2.264903],
+	                       [ -79.888376, -2.268386],
+                           [ -79.888472,-2.26843],
+                           [ -79.890408,-2.268645],
+                           [ -79.89108,-2.268313],
+	                       [ -79.891928,-2.26776 ],
+                           [ -79.89308,-2.269419],
+                           [ -79.894496,-2.271441],
+                           [ -79.894544,-2.271428],
+	                       [ -79.89476,-2.271298],
+                           [ -79.89512,-2.271054]
+	                       // Fin Coordenadas
+                        
+                    ]
+                }
+            }
+			// Punto de Inicio
+  			, {
+                "type": "Feature",
+               "geometry": {
+                   "type": "Point",
+                    "coordinates": [-79.888944, -2.265027]
+                }
+            }
+			// Punto de Fin
+			, {
+                   "type": "Feature",
+                   "geometry": {
+                   "type": "Point",
+                    "coordinates": [-79.89512,-2.271054]
+                }
+            }
+			
+			
+			
+			]
+        }
+		
+		
+    });
+
+	    map.addLayer({
+        "id": "route",
+        "type": "line",
+        "source": "route",
+        "layout": {
+            "line-join": "round",
+            "line-cap": "round"
+        },
+        "paint": {
+            "line-color": "#B48888",
+            "line-width": 3
+        }
+    });
+	
+	 map.addLayer({
+        "id": "punto",
+        "type": "circle",
+        "source": "route",
+        "paint": {
+            "circle-radius": 12,
+            "circle-color": "#B42222"
+        },
+        "filter": ["==", "$type", "Point"],
+    });
+	
+	 map.addLayer({
+        "id": "points",
+        "type": "symbol",
+        "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "geometry": {
+					// Punto Inicio
+                        "type": "Point",
+                        "coordinates": [-79.888944, -2.265027]
+                    },
+                    "properties": {
+                        "description": "<strong>Inicio</strong><p> Viaje 1534.</p>",
+                        "icon": "circle"
+                        
+                    }
+                }, {
+                    "type": "Feature",
+                    "geometry": {
+					// Punto Fin
+                        "type": "Point",
+                        "coordinates": [-79.89512,-2.271054]
+                    },
+                    "properties": {
+                        "description": "<strong>FIN</strong><p> Viaje 1534.</p>",
+                        "icon": "circle"
+						
+                    }
+                }]
+            }
+        },
+        "layout": {
+            "icon-image": "{icon}-15",
+            "text-field": "{title}",
+            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+            "text-offset": [0, 0.6],
+            "text-anchor": "top"
+        }
+    });
+
+	
+});
+
+// When a click event occurs near a place, open a popup at the location of
+// the feature, with description HTML from its properties.
+map.on('click', function (e) {
+    var features = map.queryRenderedFeatures(e.point, { layers: ['points'] });
+
+    if (!features.length) {
+        return;
+    }
+
+    var feature = features[0];
+
+    // Populate the popup and set its coordinates
+    // based on the feature found.
+    var popup = new mapboxgl.Popup()
+        .setLngLat(feature.geometry.coordinates)
+        .setHTML(feature.properties.description)
+        .addTo(map);
+});
+
+// Use the same approach as above to indicate that the symbols are clickable
+// by changing the cursor style to 'pointer'.
+map.on('mousemove', function (e) {
+    var features = map.queryRenderedFeatures(e.point, { layers: ['points'] });
+    map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+});
+
+// Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.NavigationControl());
+
+</script>
+</body>
+</html>
